@@ -5,6 +5,8 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const logRoutes = require('./routes/logs');
+const cycleRoutes = require('./routes/cycles');
 
 const app = express();
 
@@ -17,13 +19,15 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/logs', logRoutes);
+app.use('/api/cycles', cycleRoutes);
 
-// Test route
+
 app.get('/', (req, res) => {
   res.json({ message: 'Hera API is running 🌸' });
 });
 
-// MongoDB connection
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected ✅'))
   .catch((err) => console.log('MongoDB error:', err));
