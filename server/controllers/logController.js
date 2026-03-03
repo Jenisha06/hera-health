@@ -1,11 +1,11 @@
 const DailyLog = require('../models/DailyLog');
+const { parseSymptoms } = require('../services/geminiService');
 
 
 exports.createLog = async (req, res) => {
   try {
     const { rawInput, mood, sleep } = req.body;
 
-   
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -20,11 +20,17 @@ exports.createLog = async (req, res) => {
       return res.status(400).json({ message: 'You already logged today' });
     }
 
+    
+    console.log('Parsing symptoms with Gemini...');
+    const parsedSymptoms = await parseSymptoms(rawInput);
+    console.log('Parsed symptoms:', parsedSymptoms);
+
     const log = await DailyLog.create({
       userId: req.userId,
       rawInput,
       mood,
-      sleep
+      sleep,
+      parsedSymptoms
     });
 
     res.status(201).json({ message: 'Log saved', log });
@@ -42,7 +48,6 @@ exports.getLogs = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-
 
 exports.getTodayLog = async (req, res) => {
   try {
