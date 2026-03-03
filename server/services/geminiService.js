@@ -1,16 +1,19 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 
 exports.parseSymptoms = async (rawInput) => {
   try {
-    const prompt = `
-You are a women's health assistant. Analyze this text and extract symptoms.
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'user',
+          content: `You are a women's health assistant. Analyze this text and extract symptoms.
 Text: "${rawInput}"
 
-Return ONLY a JSON array like this, nothing else:
+Return ONLY a JSON array like this, nothing else, no markdown:
 [
   {"tag": "fatigue", "severity": "moderate"},
   {"tag": "bloating", "severity": "mild"}
@@ -18,46 +21,54 @@ Return ONLY a JSON array like this, nothing else:
 
 Severity must be one of: mild, moderate, severe.
 Only include actual physical or emotional symptoms.
-If no symptoms found return empty array [].
-`;
+If no symptoms found return empty array [].`
+        }
+      ],
+      temperature: 0.1
+    });
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     return JSON.parse(clean);
   } catch (err) {
-    console.log('Gemini parse error:', err);
+    console.log('Groq parse error:', err.message);
     return [];
   }
 };
 
-
+// Generate weekly insight
 exports.generateWeeklyInsight = async (logs) => {
   try {
     const logSummary = logs.map(l =>
       `Date: ${new Date(l.date).toDateString()}, Symptoms: ${l.parsedSymptoms?.map(s => s.tag).join(', ') || 'none'}, Mood: ${l.mood}/5, Sleep: ${l.sleep}hrs`
     ).join('\n');
 
-    const prompt = `
-You are a compassionate women's health assistant.
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'user',
+          content: `You are a compassionate women's health assistant.
 Based on these daily logs, write a warm 2-3 sentence weekly insight summary in plain language.
 Focus on patterns you notice. Do not diagnose. Be encouraging.
 
 Logs:
 ${logSummary}
 
-Return only the insight text, no extra formatting.
-`;
+Return only the insight text, no extra formatting.`
+        }
+      ],
+      temperature: 0.7
+    });
 
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    return completion.choices[0].message.content.trim();
   } catch (err) {
-    console.log('Gemini insight error:', err);
+    console.log('Groq insight error:', err.message);
     return 'Keep logging daily — Hera will generate your weekly insight once it has enough data.';
   }
 };
 
-
+// Generate doctor prep sheet
 exports.generateDoctorPrep = async (logs, cycles, riskFlags) => {
   try {
     const logSummary = logs.slice(0, 28).map(l =>
@@ -68,8 +79,12 @@ exports.generateDoctorPrep = async (logs, cycles, riskFlags) => {
       `Period: ${new Date(c.periodStartDate).toDateString()}, Flow: ${c.flowLevel}/3, Pain: ${c.painLevel}/5`
     ).join('\n');
 
-    const prompt = `
-You are a medical assistant helping a woman prepare for a gynecology appointment.
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'user',
+          content: `You are a medical assistant helping a woman prepare for a gynecology appointment.
 Based on her health logs, create a professional doctor prep sheet.
 
 Daily Logs (last 28 days):
@@ -80,7 +95,7 @@ ${cycleSummary}
 
 Risk Flags: ${riskFlags.join(', ') || 'none'}
 
-Return a JSON object like this:
+Return a JSON object like this, no markdown:
 {
   "summary": "2-3 sentence professional patient summary",
   "highlights": [
@@ -98,28 +113,34 @@ Return a JSON object like this:
   ]
 }
 
-Return only valid JSON, nothing else.
-`;
+Return only valid JSON, nothing else.`
+        }
+      ],
+      temperature: 0.3
+    });
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     return JSON.parse(clean);
   } catch (err) {
-    console.log('Gemini doctor prep error:', err);
+    console.log('Groq doctor prep error:', err.message);
     return null;
   }
 };
 
-
+// Generate dismiss-proof response
 exports.generateDismissProof = async (doctorSaid, symptoms) => {
   try {
-    const prompt = `
-You are a women's health advocate helping a patient respond to their doctor.
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'user',
+          content: `You are a women's health advocate helping a patient respond to their doctor.
 The doctor said: "${doctorSaid}"
 The patient's tracked symptoms include: ${symptoms.join(', ')}
 
-Return a JSON object like this:
+Return a JSON object like this, no markdown:
 {
   "message": "2-3 sentences of evidence-based context about why these symptoms deserve investigation",
   "tests": [
@@ -131,15 +152,17 @@ Return a JSON object like this:
   "script": "A polite but firm 2-3 sentence script the patient can say to their doctor"
 }
 
-Return only valid JSON, nothing else.
-`;
+Return only valid JSON, nothing else.`
+        }
+      ],
+      temperature: 0.3
+    });
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     return JSON.parse(clean);
   } catch (err) {
-    console.log('Gemini dismiss proof error:', err);
+    console.log('Groq dismiss proof error:', err.message);
     return null;
   }
 };
