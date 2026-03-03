@@ -1,113 +1,178 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../src/context/AuthContext';
+import axios from 'axios';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
-const moodData = [
-  { day: 'Day 1', mood: 3, sleep: 7 },
-  { day: 'Day 2', mood: 2, sleep: 5 },
-  { day: 'Day 3', mood: 4, sleep: 8 },
-  { day: 'Day 4', mood: 3, sleep: 6 },
-  { day: 'Day 5', mood: 2, sleep: 5 },
-  { day: 'Day 6', mood: 1, sleep: 4 },
-  { day: 'Day 7', mood: 3, sleep: 7 },
-  { day: 'Day 8', mood: 4, sleep: 8 },
-  { day: 'Day 9', mood: 5, sleep: 9 },
-  { day: 'Day 10', mood: 4, sleep: 7 },
-  { day: 'Day 11', mood: 3, sleep: 6 },
-  { day: 'Day 12', mood: 2, sleep: 5 },
-  { day: 'Day 13', mood: 1, sleep: 4 },
-  { day: 'Day 14', mood: 2, sleep: 5 },
-];
-
-const symptomData = [
-  { symptom: 'Fatigue', count: 8 },
-  { symptom: 'Bloating', count: 6 },
-  { symptom: 'Cramps', count: 5 },
-  { symptom: 'Headache', count: 4 },
-  { symptom: 'Acne', count: 3 },
-  { symptom: 'Mood swings', count: 7 },
-];
-
-const insights = [
-  { icon: '🔗', text: 'Fatigue and bloating appear together 80% of the time before your period' },
-  { icon: '😴', text: 'On days you sleep less than 6 hours your mood drops by an average of 2 points' },
-  { icon: '📅', text: 'Your mood is consistently lowest 5 days before your period starts' },
-];
-
 export default function Patterns() {
+  const { token } = useAuth();
+  const [patterns, setPatterns] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPatterns();
+    fetchLogs();
+  }, []);
+
+  const fetchPatterns = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/patterns', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPatterns(res.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/logs', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setLogs(res.data.slice(0, 14).reverse());
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const moodSleepData = logs.map((log, i) => ({
+    day: `Day ${i + 1}`,
+    mood: log.mood,
+    sleep: log.sleep
+  }));
+
+  const symptomFrequency = {};
+  logs.forEach(log => {
+    log.parsedSymptoms?.forEach(s => {
+      symptomFrequency[s.tag] = (symptomFrequency[s.tag] || 0) + 1;
+    });
+  });
+
+  const symptomData = Object.entries(symptomFrequency)
+    .map(([symptom, count]) => ({ symptom, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-gray-400">Analyzing your patterns...</p>
+    </div>
+  );
+
   return (
     <div>
-      {/* Header */}
+    
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">🔍 Pattern Board</h1>
-        <p className="text-gray-400 mt-1">Hera is learning your body's patterns</p>
-      </div>
-
-      {/* AI Insights */}
-      <div className="bg-pink-500 rounded-2xl p-6 text-white mb-6">
-        <h2 className="text-lg font-bold mb-4">✨ AI Insights</h2>
-        <div className="space-y-3">
-          {insights.map((insight, i) => (
-            <div key={i} className="flex items-start gap-3 bg-white bg-opacity-20 rounded-xl p-3">
-              <span className="text-xl">{insight.icon}</span>
-              <p className="text-sm text-white">{insight.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mood & Sleep Chart */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-6">Mood & Sleep — Last 14 Days</h2>
-        <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={moodData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-            <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="mood"
-              stroke="#E91E8C"
-              strokeWidth={2}
-              dot={{ fill: '#E91E8C', r: 4 }}
-              name="Mood"
-            />
-            <Line
-              type="monotone"
-              dataKey="sleep"
-              stroke="#f9a8d4"
-              strokeWidth={2}
-              dot={{ fill: '#f9a8d4', r: 4 }}
-              name="Sleep (hrs)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Symptom Frequency Chart */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-6">Most Frequent Symptoms</h2>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={symptomData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="symptom" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-            <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
-            <Tooltip />
-            <Bar dataKey="count" fill="#E91E8C" radius={[6, 6, 0, 0]} name="Times logged" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Notice */}
-      <div className="bg-pink-50 rounded-2xl p-4 text-center">
-        <p className="text-pink-400 text-sm">
-          📊 These insights get more accurate the more you log. Keep logging daily!
+        <p className="text-gray-400 mt-1">
+          Based on your last {patterns?.logsCount || 0} days of logging
         </p>
       </div>
+
+     
+      {patterns?.logsCount < 3 ? (
+        <div className="bg-pink-50 rounded-2xl p-12 text-center">
+          <p className="text-5xl mb-4">📊</p>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Not enough data yet</h2>
+          <p className="text-gray-400 text-sm mb-4">
+            Hera needs at least 3 days of logs to find patterns. Keep logging daily!
+          </p>
+          <a href="/log" className="bg-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-pink-600 transition inline-block">
+            Log Today →
+          </a>
+        </div>
+      ) : (
+        <div className="space-y-6">
+
+          
+          <div className="bg-pink-500 rounded-2xl p-6 text-white">
+            <h2 className="text-lg font-bold mb-2">✨ Weekly Insight</h2>
+            <p className="text-pink-100 text-sm">{patterns?.weeklyInsight}</p>
+          </div>
+
+        
+          {patterns?.correlations?.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">🔗 Patterns Hera Found</h2>
+              <div className="space-y-3">
+                {patterns.correlations.map((c, i) => (
+                  <div key={i} className="flex items-center gap-4 bg-pink-50 rounded-xl p-4">
+                    <div className="bg-pink-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {Math.round(c.strength * 100)}%
+                    </div>
+                    <p className="text-gray-700 text-sm">{c.insight}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+         
+          {patterns?.riskFlags?.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">⚠️ Health Flags</h2>
+              <div className="space-y-3">
+                {patterns.riskFlags.map((flag, i) => (
+                  <div key={i} className="border border-orange-200 bg-orange-50 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-orange-600 text-sm">{flag.condition}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        flag.confidence === 'high' ? 'bg-red-100 text-red-500' :
+                        flag.confidence === 'moderate' ? 'bg-orange-100 text-orange-500' :
+                        'bg-yellow-100 text-yellow-600'
+                      }`}>
+                        {flag.confidence} confidence
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm">{flag.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        
+          {moodSleepData.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-6">Mood & Sleep Trends</h2>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={moodSleepData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="mood" stroke="#E91E8C" strokeWidth={2} dot={{ fill: '#E91E8C', r: 4 }} name="Mood" />
+                  <Line type="monotone" dataKey="sleep" stroke="#f9a8d4" strokeWidth={2} dot={{ fill: '#f9a8d4', r: 4 }} name="Sleep (hrs)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          
+          {symptomData.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-6">Most Frequent Symptoms</h2>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={symptomData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="symptom" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#E91E8C" radius={[6, 6, 0, 0]} name="Times logged" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const logRoutes = require('./routes/logs');
 const cycleRoutes = require('./routes/cycles');
+const patternRoutes = require('./routes/patterns');
 
 const app = express();
 
@@ -16,11 +17,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/cycles', cycleRoutes);
+app.use('/api/patterns', patternRoutes);
 
 
 app.get('/', (req, res) => {
