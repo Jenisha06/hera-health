@@ -8,6 +8,8 @@ const userRoutes = require('./routes/user');
 const logRoutes = require('./routes/logs');
 const cycleRoutes = require('./routes/cycles');
 const patternRoutes = require('./routes/patterns');
+const doctorPrepRoutes = require('./routes/doctorprep');
+const dismissProofRoutes = require('./routes/dismissproof');
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/cycles', cycleRoutes);
 app.use('/api/patterns', patternRoutes);
+app.use('/api/doctorprep', doctorPrepRoutes);
+app.use('/api/dismissproof', dismissProofRoutes);
 
 
 app.get('/', (req, res) => {

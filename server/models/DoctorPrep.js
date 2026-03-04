@@ -5,7 +5,13 @@ const doctorPrepSchema = new mongoose.Schema({
   generatedAt: { type: Date, default: Date.now },
   summaryText: { type: String },
   questionsForDoctor: [{ type: String }],
-  symptomHighlights: [{ type: String }]
+  symptomHighlights: [
+    {
+      icon: { type: String },
+      label: { type: String },
+      value: { type: String }
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('DoctorPrep', doctorPrepSchema);
