@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../../src/context/AuthContext';
 import axios from 'axios';
+import { CheckCircle, Heart, Moon, Send } from 'lucide-react';
 
 export default function DailyLog() {
   const { token } = useAuth();
@@ -46,7 +47,7 @@ export default function DailyLog() {
     }
   };
 
-  const moodEmojis = ['', '😞', '😕', '😐', '🙂', '😊'];
+  const moodLabels = ['', 'Very Low', 'Low', 'Okay', 'Good', 'Great'];
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -58,23 +59,22 @@ export default function DailyLog() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">📝 Daily Log</h1>
-        <p className="text-gray-400 mt-1">Tell Hera how you're feeling today</p>
+        <h1 className="text-3xl font-bold text-gray-800">Daily Log</h1>
+        <p className="text-gray-400 mt-1">Tell Hera how you are feeling today</p>
       </div>
 
-      {/* Already logged today */}
       {todayLog ? (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-3xl">✅</span>
+            <CheckCircle size={28} className="text-green-400" />
             <div>
-              <h2 className="text-lg font-bold text-gray-800">You've logged today!</h2>
+              <h2 className="text-lg font-bold text-gray-800">You have logged today!</h2>
               <p className="text-gray-400 text-sm">Come back tomorrow for your next log</p>
             </div>
           </div>
           <div className="bg-pink-50 rounded-xl p-4 space-y-2">
             <p className="text-sm text-gray-600"><span className="font-semibold">How you felt:</span> {todayLog.rawInput}</p>
-            <p className="text-sm text-gray-600"><span className="font-semibold">Mood:</span> {moodEmojis[todayLog.mood]} {todayLog.mood}/5</p>
+            <p className="text-sm text-gray-600"><span className="font-semibold">Mood:</span> {moodLabels[todayLog.mood]} ({todayLog.mood}/5)</p>
             <p className="text-sm text-gray-600"><span className="font-semibold">Sleep:</span> {todayLog.sleep} hours</p>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function DailyLog() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           {success ? (
             <div className="text-center py-8">
-              <p className="text-5xl mb-4">🌸</p>
+              <CheckCircle size={48} className="text-pink-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-gray-800 mb-2">Log saved!</h2>
               <p className="text-gray-400">Hera is learning your patterns. Keep it up!</p>
             </div>
@@ -90,7 +90,6 @@ export default function DailyLog() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && <p className="text-red-500 text-sm">{error}</p>}
 
-              {/* How are you feeling */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   How are you feeling today?
@@ -105,11 +104,13 @@ export default function DailyLog() {
                 />
               </div>
 
-              {/* Mood */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Mood today — {moodEmojis[form.mood]} {form.mood}/5
-                </label>
+                <div className="flex items-center gap-2 mb-3">
+                  <Heart size={16} className="text-pink-400" />
+                  <label className="text-sm font-semibold text-gray-700">
+                    Mood today — {moodLabels[form.mood]} ({form.mood}/5)
+                  </label>
+                </div>
                 <input
                   type="range"
                   min="1"
@@ -124,11 +125,13 @@ export default function DailyLog() {
                 </div>
               </div>
 
-              {/* Sleep */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Hours of sleep — {form.sleep} hrs
-                </label>
+                <div className="flex items-center gap-2 mb-3">
+                  <Moon size={16} className="text-pink-400" />
+                  <label className="text-sm font-semibold text-gray-700">
+                    Hours of sleep — {form.sleep} hrs
+                  </label>
+                </div>
                 <input
                   type="range"
                   min="1"
@@ -146,9 +149,10 @@ export default function DailyLog() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50"
+                className="w-full bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {submitting ? 'Saving...' : 'Save Log 🌸'}
+                <Send size={16} />
+                {submitting ? 'Saving...' : 'Save Log'}
               </button>
             </form>
           )}

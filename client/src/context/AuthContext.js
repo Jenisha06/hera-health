@@ -9,13 +9,18 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = (token, user) => {

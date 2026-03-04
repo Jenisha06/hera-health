@@ -1,5 +1,5 @@
 const DailyLog = require('../models/DailyLog');
-const { generateDismissProof } = require('../services/geminiService');
+const { generateDismissProof } = require('../services/groqService');
 
 exports.generateResponse = async (req, res) => {
   try {

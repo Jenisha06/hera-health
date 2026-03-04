@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../../src/context/AuthContext';
 import axios from 'axios';
+import { Lightbulb, Link, AlertTriangle, TrendingUp, BarChart2 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer
@@ -93,14 +94,20 @@ export default function Patterns() {
 
           
           <div className="bg-pink-500 rounded-2xl p-6 text-white">
-            <h2 className="text-lg font-bold mb-2">✨ Weekly Insight</h2>
+           <div className="flex items-center gap-2 mb-2">
+  <Lightbulb size={18} />
+  <h2 className="text-lg font-bold">Weekly Insight</h2>
+</div>
             <p className="text-pink-100 text-sm">{patterns?.weeklyInsight}</p>
           </div>
 
         
           {patterns?.correlations?.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">🔗 Patterns Hera Found</h2>
+              <div className="flex items-center gap-2 mb-4">
+  <Link size={18} className="text-pink-400" />
+  <h2 className="text-lg font-bold text-gray-800">Patterns Hera Found</h2>
+</div>
               <div className="space-y-3">
                 {patterns.correlations.map((c, i) => (
                   <div key={i} className="flex items-center gap-4 bg-pink-50 rounded-xl p-4">
@@ -117,7 +124,13 @@ export default function Patterns() {
          
           {patterns?.riskFlags?.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">⚠️ Health Flags</h2>
+              <div className="flex items-center gap-2 mb-4">
+  <AlertTriangle size={18} className="text-orange-400" />
+  <div className="flex items-center gap-2 mb-4">
+  <AlertTriangle size={18} className="text-orange-400" />
+  <h2 className="text-lg font-bold text-gray-800">Health Flags</h2>
+</div>
+</div>
               <div className="space-y-3">
                 {patterns.riskFlags.map((flag, i) => (
                   <div key={i} className="border border-orange-200 bg-orange-50 rounded-xl p-4">
@@ -141,7 +154,10 @@ export default function Patterns() {
         
           {moodSleepData.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-6">Mood & Sleep Trends</h2>
+              <div className="flex items-center gap-2 mb-6">
+  <TrendingUp size={18} className="text-pink-400" />
+  <h2 className="text-lg font-bold text-gray-800">Mood & Sleep Trends</h2>
+</div>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={moodSleepData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -158,7 +174,10 @@ export default function Patterns() {
           
           {symptomData.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-6">Most Frequent Symptoms</h2>
+             <div className="flex items-center gap-2 mb-6">
+  <BarChart2 size={18} className="text-pink-400" />
+  <h2 className="text-lg font-bold text-gray-800">Most Frequent Symptoms</h2>
+</div>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={symptomData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

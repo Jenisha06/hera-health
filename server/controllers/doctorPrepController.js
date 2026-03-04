@@ -2,11 +2,11 @@ const DailyLog = require('../models/DailyLog');
 const CycleLog = require('../models/CycleLog');
 const PatternResult = require('../models/PatternResult');
 const DoctorPrep = require('../models/DoctorPrep');
-const { generateDoctorPrep } = require('../services/geminiService');
+const { generateDoctorPrep } = require('../services/groqService');
 
 exports.generatePrep = async (req, res) => {
   try {
-    // Get last 28 days of logs
+    
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 28);
 
@@ -19,7 +19,7 @@ exports.generatePrep = async (req, res) => {
       userId: req.userId
     }).sort({ periodStartDate: -1 }).limit(3);
 
-    // Get existing risk flags
+   
     const patternResult = await PatternResult.findOne({ userId: req.userId });
     const riskFlags = patternResult?.riskFlags?.map(f => f.condition) || [];
 
@@ -29,14 +29,14 @@ exports.generatePrep = async (req, res) => {
       });
     }
 
-    // Generate with Groq
+    
     const result = await generateDoctorPrep(logs, cycles, riskFlags);
 
     if (!result) {
       return res.status(500).json({ message: 'Failed to generate prep sheet' });
     }
 
-    // Save to MongoDB
+    
     const prep = await DoctorPrep.findOneAndUpdate(
       { userId: req.userId },
       {

@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../../src/context/AuthContext';
 import axios from 'axios';
+import { Moon, Plus, Clock, Droplets, Activity } from 'lucide-react';
 
 export default function CycleTracker() {
   const { token } = useAuth();
@@ -56,7 +57,6 @@ export default function CycleTracker() {
 
   const flowLabels = ['', 'Light', 'Medium', 'Heavy'];
   const painLabels = ['', 'Minimal', 'Mild', 'Moderate', 'Severe', 'Unbearable'];
-  const flowColors = ['', 'text-pink-300', 'text-pink-500', 'text-pink-700'];
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -68,18 +68,21 @@ export default function CycleTracker() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">🌙 My Cycle</h1>
+        <h1 className="text-3xl font-bold text-gray-800">My Cycle</h1>
         <p className="text-gray-400 mt-1">Track your period to help Hera find patterns</p>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Log Form */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Log a Period</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <Plus size={18} className="text-pink-400" />
+            <h2 className="text-lg font-bold text-gray-800">Log a Period</h2>
+          </div>
 
           {success && (
             <div className="bg-pink-50 text-pink-500 rounded-xl p-3 text-sm mb-4">
-              Period logged successfully 🌸
+              Period logged successfully
             </div>
           )}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -97,7 +100,9 @@ export default function CycleTracker() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">End Date <span className="text-gray-400 font-normal">(optional)</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                End Date <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
               <input
                 type="date"
                 value={form.periodEndDate}
@@ -107,9 +112,12 @@ export default function CycleTracker() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Flow Level — <span className={flowColors[form.flowLevel]}>{flowLabels[form.flowLevel]}</span>
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <Droplets size={16} className="text-pink-400" />
+                <label className="text-sm font-semibold text-gray-700">
+                  Flow Level — {flowLabels[form.flowLevel]}
+                </label>
+              </div>
               <input
                 type="range"
                 min="1"
@@ -126,9 +134,12 @@ export default function CycleTracker() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Pain Level — {painLabels[form.painLevel]}
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={16} className="text-pink-400" />
+                <label className="text-sm font-semibold text-gray-700">
+                  Pain Level — {painLabels[form.painLevel]}
+                </label>
+              </div>
               <input
                 type="range"
                 min="1"
@@ -144,7 +155,9 @@ export default function CycleTracker() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Notes <span className="text-gray-400 font-normal">(optional)</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Notes <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
               <textarea
                 placeholder="Any additional notes..."
                 value={form.notes}
@@ -157,19 +170,23 @@ export default function CycleTracker() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50"
+              className="w-full bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {submitting ? 'Saving...' : 'Log Period 🌸'}
+              <Moon size={16} />
+              {submitting ? 'Saving...' : 'Log Period'}
             </button>
           </form>
         </div>
 
         {/* Cycle History */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Cycle History</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <Clock size={18} className="text-pink-400" />
+            <h2 className="text-lg font-bold text-gray-800">Cycle History</h2>
+          </div>
           {cycles.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-4xl mb-3">🌙</p>
+              <Moon size={40} className="text-pink-200 mx-auto mb-3" />
               <p className="text-gray-400 text-sm">No cycles logged yet</p>
             </div>
           ) : (
@@ -179,8 +196,12 @@ export default function CycleTracker() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold text-gray-800 text-sm">
-                        {new Date(cycle.periodStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        {cycle.periodEndDate && ` → ${new Date(cycle.periodEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                        {new Date(cycle.periodStartDate).toLocaleDateString('en-US', {
+                          month: 'short', day: 'numeric', year: 'numeric'
+                        })}
+                        {cycle.periodEndDate && ` → ${new Date(cycle.periodEndDate).toLocaleDateString('en-US', {
+                          month: 'short', day: 'numeric'
+                        })}`}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         Flow: {flowLabels[cycle.flowLevel]} · Pain: {painLabels[cycle.painLevel]}

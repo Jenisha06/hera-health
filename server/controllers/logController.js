@@ -1,5 +1,5 @@
 const DailyLog = require('../models/DailyLog');
-const { parseSymptoms } = require('../services/geminiService');
+const { parseSymptoms } = require('../services/groqService');
 
 
 exports.createLog = async (req, res) => {

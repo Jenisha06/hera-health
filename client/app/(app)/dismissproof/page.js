@@ -1,38 +1,39 @@
 'use client';
 import { useState } from 'react';
-
-const responses = {
-  default: {
-    message: `Research shows that the combination of symptoms you've described warrants further investigation. Hormonal imbalances are often dismissed as stress or lifestyle issues, but they can have significant long-term health impacts if left untreated.`,
-    tests: [
-      'Complete hormone panel (FSH, LH, estrogen, progesterone)',
-      'Thyroid function test (TSH, T3, T4)',
-      'Pelvic ultrasound to check for cysts',
-      'Complete blood count (CBC)',
-    ],
-    script: `"I understand you think it may be stress-related, but I've been tracking my symptoms for several weeks and I notice consistent patterns that concern me. I'd like to request a hormone panel and thyroid test to rule out any underlying conditions. Can we discuss this further?"`
-  }
-};
+import { useAuth } from '../../../src/context/AuthContext';
+import axios from 'axios';
+import { Shield, Lightbulb, FlaskConical, MessageCircle, RotateCcw, Send } from 'lucide-react';
 
 export default function DismissProof() {
+  const { token } = useAuth();
   const [doctorSaid, setDoctorSaid] = useState('');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setResponse(responses.default);
+    setError('');
+    try {
+      const res = await axios.post(
+        'http://localhost:5000/api/dismissproof/generate',
+        { doctorSaid },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setResponse(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">🛡️ Dismiss-Proof</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Dismiss-Proof</h1>
         <p className="text-gray-400 mt-1">
           Don't let your concerns be dismissed — get the language to advocate for yourself
         </p>
@@ -40,7 +41,7 @@ export default function DismissProof() {
 
       {/* Info Banner */}
       <div className="bg-pink-50 rounded-2xl p-4 mb-6 flex items-start gap-3">
-        <span className="text-2xl">💡</span>
+        <Lightbulb size={22} className="text-pink-400 flex-shrink-0 mt-0.5" />
         <p className="text-pink-600 text-sm">
           Women's health concerns are dismissed 50% more often than men's.
           Hera gives you evidence-based language to push back — politely but firmly.
@@ -49,9 +50,10 @@ export default function DismissProof() {
 
       {/* Input */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">
-          What did your doctor say?
-        </h2>
+        <div className="flex items-center gap-2 mb-4">
+          <MessageCircle size={18} className="text-pink-400" />
+          <h2 className="text-lg font-bold text-gray-800">What did your doctor say?</h2>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <textarea
             placeholder="e.g. My doctor said it's just stress and I should exercise more..."
@@ -61,12 +63,14 @@ export default function DismissProof() {
             className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-400 resize-none"
             required
           />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="bg-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50"
+            className="bg-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-pink-600 transition disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? 'Analyzing...' : 'Get My Response 🛡️'}
+            <Shield size={16} />
+            {loading ? 'Analyzing with AI...' : 'Get My Response'}
           </button>
         </form>
       </div>
@@ -76,15 +80,21 @@ export default function DismissProof() {
         <div className="space-y-4">
           {/* Evidence */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-3">📚 What Research Says</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb size={18} className="text-pink-400" />
+              <h2 className="text-lg font-bold text-gray-800">What Research Says</h2>
+            </div>
             <p className="text-gray-600 text-sm leading-relaxed">{response.message}</p>
           </div>
 
-          {/* Tests to Request */}
+          {/* Tests */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">🧪 Tests to Request by Name</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <FlaskConical size={18} className="text-pink-400" />
+              <h2 className="text-lg font-bold text-gray-800">Tests to Request by Name</h2>
+            </div>
             <div className="space-y-2">
-              {response.tests.map((test, i) => (
+              {response.tests?.map((test, i) => (
                 <div key={i} className="flex items-center gap-3 bg-pink-50 rounded-xl p-3">
                   <span className="text-pink-500 font-bold text-sm">{i + 1}</span>
                   <p className="text-gray-700 text-sm">{test}</p>
@@ -95,9 +105,21 @@ export default function DismissProof() {
 
           {/* Script */}
           <div className="bg-pink-500 rounded-2xl p-6 text-white">
-            <h2 className="text-lg font-bold mb-3">💬 What to Say to Your Doctor</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <MessageCircle size={18} />
+              <h2 className="text-lg font-bold">What to Say to Your Doctor</h2>
+            </div>
             <p className="text-pink-100 text-sm leading-relaxed italic">{response.script}</p>
           </div>
+
+          {/* Try again */}
+          <button
+            onClick={() => { setResponse(null); setDoctorSaid(''); }}
+            className="bg-white text-gray-500 px-6 py-3 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition flex items-center gap-2"
+          >
+            <RotateCcw size={16} />
+            Try Another Response
+          </button>
         </div>
       )}
     </div>
