@@ -134,9 +134,29 @@ export default function Resources() {
           <h2 className="text-lg font-bold text-gray-800">Find Nearby Clinics</h2>
         </div>
         <p className="text-gray-400 text-sm mb-4">Women's health clinics and gynecologists near you</p>
-        <div className="bg-pink-50 rounded-xl h-48 flex items-center justify-center">
-          <p className="text-pink-300 text-sm">Map coming soon — Google Maps API to be added on Day 27</p>
-        </div>
+       <div className="rounded-xl overflow-hidden h-72">
+  <iframe
+    width="100%"
+    height="100%"
+    frameBorder="0"
+    scrolling="no"
+    src="https://www.openstreetmap.org/export/embed.html?bbox=74.7,12.8,75.1,13.1&layer=mapnik&marker=12.9716,74.9800"
+    style={{ border: 0 }}
+  />
+</div>
+<p className="text-xs text-gray-400 mt-2 text-center">
+  Map data from OpenStreetMap — search for gynecologists near you
+</p>
+<a
+  href="https://www.google.com/maps/search/gynecologist+near+me"
+  target="_blank"
+  rel="noreferrer"
+  className="mt-3 flex items-center justify-center gap-2 bg-pink-50 text-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-pink-100 transition"
+>
+  
+  <MapPin size={16} />
+  Open Full Map Search
+</a>
       </div>
     </div>
   );
