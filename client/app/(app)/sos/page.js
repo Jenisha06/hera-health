@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { AlertCircle, CheckCircle, User, Phone, Save } from 'lucide-react';
 
 export default function SOS() {
@@ -10,6 +10,7 @@ export default function SOS() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sosTriggered, setSosTriggered] = useState(false);
+  const [sosMessage, setSosMessage] = useState('');
 
   useEffect(() => {
     fetchContacts();
@@ -17,9 +18,7 @@ export default function SOS() {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/user/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/user/me');
       if (res.data.emergencyContacts?.length > 0) {
         setContacts(res.data.emergencyContacts);
       }
@@ -31,10 +30,7 @@ export default function SOS() {
   const handleSaveContacts = async () => {
     setSaving(true);
     try {
-      await axios.put('http://localhost:5000/api/user/contacts',
-        { emergencyContacts: contacts },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put('/user/contacts', { emergencyContacts: contacts });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -52,31 +48,17 @@ export default function SOS() {
         (position) => {
           const { latitude, longitude } = position.coords;
           const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
-          const message = encodeURIComponent(
+          setSosMessage(
             `EMERGENCY ALERT\n\nI need help! This is an automated SOS from Hera.\n\nMy current location: ${locationUrl}\n\nPlease contact me immediately.`
           );
-          contacts.forEach((contact) => {
-            if (contact.phone) {
-              const phone = contact.phone.replace(/\D/g, '');
-              window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-            }
-          });
         },
         () => {
-          const message = encodeURIComponent(
+          setSosMessage(
             `EMERGENCY ALERT\n\nI need help! This is an automated SOS from Hera.\n\nPlease contact me immediately.`
           );
-          contacts.forEach((contact) => {
-            if (contact.phone) {
-              const phone = contact.phone.replace(/\D/g, '');
-              window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-            }
-          });
         }
       );
     }
-
-    setTimeout(() => setSosTriggered(false), 5000);
   };
 
   return (
@@ -90,8 +72,30 @@ export default function SOS() {
         {sosTriggered ? (
           <div>
             <CheckCircle size={56} className="text-green-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-green-500 mb-2">Help is on the way!</h2>
-            <p className="text-gray-400 text-sm">Your location has been sent to your emergency contacts</p>
+            <h2 className="text-xl font-bold text-green-500 mb-2">SOS Activated!</h2>
+            <p className="text-gray-400 text-sm mb-6">
+              Tap below to send WhatsApp message to each contact
+            </p>
+            <div className="space-y-3">
+              {contacts.filter(c => c.phone).map((contact, i) => (
+                <a
+                  key={i}
+                 href={"https://wa.me/" + contact.phone.replace(/\D/g, '') + "?text=" + encodeURIComponent(sosMessage)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition"
+                >
+                  <span>{contact.name || `Contact ${i + 1}`}</span>
+                  <span className="text-sm">Open WhatsApp</span>
+                </a>
+              ))}
+            </div>
+            <button
+              onClick={() => setSosTriggered(false)}
+              className="mt-4 text-gray-400 text-sm underline"
+            >
+              Cancel
+            </button>
           </div>
         ) : (
           <div>
@@ -107,7 +111,7 @@ export default function SOS() {
               <span className="text-lg">SOS</span>
             </button>
             <p className="text-gray-400 text-xs mt-6">
-              Tap once to send your location to all emergency contacts
+              Tap once to activate SOS and alert your emergency contacts
             </p>
           </div>
         )}

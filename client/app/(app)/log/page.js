@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { CheckCircle, Heart, Moon, Send } from 'lucide-react';
 
 export default function DailyLog() {
@@ -19,9 +19,7 @@ export default function DailyLog() {
 
   const fetchTodayLog = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/logs/today', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/logs/today');
       setTodayLog(res.data);
     } catch (err) {
       console.log(err);
@@ -35,9 +33,7 @@ export default function DailyLog() {
     setSubmitting(true);
     setError('');
     try {
-      await axios.post('http://localhost:5000/api/logs', form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/logs' ,form);
       setSuccess(true);
       fetchTodayLog();
     } catch (err) {

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { Shield, Lightbulb, FlaskConical, MessageCircle, RotateCcw, Send } from 'lucide-react';
 
 export default function DismissProof() {
@@ -16,11 +16,7 @@ export default function DismissProof() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(
-        'http://localhost:5000/api/dismissproof/generate',
-        { doctorSaid },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+     const res = await api.post('/dismissproof/generate', { doctorSaid });
       setResponse(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
@@ -31,7 +27,7 @@ export default function DismissProof() {
 
   return (
     <div>
-      {/* Header */}
+     
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Dismiss-Proof</h1>
         <p className="text-gray-400 mt-1">

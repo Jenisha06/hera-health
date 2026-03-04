@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { Moon, Plus, Clock, Droplets, Activity } from 'lucide-react';
 
 export default function CycleTracker() {
@@ -25,9 +25,7 @@ export default function CycleTracker() {
 
   const fetchCycles = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/cycles', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/cycles');
       setCycles(res.data);
     } catch (err) {
       console.log(err);
@@ -41,9 +39,7 @@ export default function CycleTracker() {
     setSubmitting(true);
     setError('');
     try {
-      await axios.post('http://localhost:5000/api/cycles', form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/cycles',form);
       setSuccess(true);
       fetchCycles();
       setTimeout(() => setSuccess(false), 3000);
@@ -66,14 +62,14 @@ export default function CycleTracker() {
 
   return (
     <div>
-      {/* Header */}
+      
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">My Cycle</h1>
         <p className="text-gray-400 mt-1">Track your period to help Hera find patterns</p>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
-        {/* Log Form */}
+        
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <Plus size={18} className="text-pink-400" />
@@ -178,7 +174,6 @@ export default function CycleTracker() {
           </form>
         </div>
 
-        {/* Cycle History */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <Clock size={18} className="text-pink-400" />

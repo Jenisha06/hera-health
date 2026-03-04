@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { TrendingUp, Calendar, Moon, AlertTriangle, Lightbulb, FileText } from 'lucide-react';
 
 export default function Dashboard() {
@@ -20,8 +20,8 @@ export default function Dashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [patternsRes, logsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/patterns', { headers }),
-        axios.get('http://localhost:5000/api/logs', { headers })
+        api.get('/patterns'),
+        api.get('/logs')
       ]);
 
       setPatterns(patternsRes.data);
@@ -62,7 +62,7 @@ export default function Dashboard() {
         <p className="text-gray-400 mt-1">How are you feeling today?</p>
       </div>
 
-      {/* Stats Cards */}
+      
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-3">
@@ -90,7 +90,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Weekly Insight */}
+      
       {patterns?.weeklyInsight && (
         <div className="bg-pink-500 rounded-2xl p-6 text-white mb-6">
           <div className="flex items-center gap-2 mb-2">
@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Daily Check-in */}
+    
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
         <div className="flex items-center gap-2 mb-2">
           <FileText size={18} className="text-pink-400" />
@@ -145,7 +145,7 @@ export default function Dashboard() {
         </a>
       </div>
 
-      {/* Tip of the Day */}
+     
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-2">
           <Lightbulb size={18} className="text-pink-400" />

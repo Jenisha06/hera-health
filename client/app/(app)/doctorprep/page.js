@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { ClipboardList, FileText, HelpCircle, Download, RefreshCw ,Calendar , Moon, Heart , AlertTriangle} from 'lucide-react';
 
 export default function DoctorPrep() {
@@ -18,9 +18,7 @@ export default function DoctorPrep() {
 
   const checkExistingPrep = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/doctorprep', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/doctorprep');
       if (res.data) {
         setResult({
           summary: res.data.summaryText,
@@ -40,11 +38,7 @@ export default function DoctorPrep() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(
-        'http://localhost:5000/api/doctorprep/generate',
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const res = await api.post('/doctorprep/generate', {});
       setResult(res.data);
       setGenerated(true);
     } catch (err) {

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../src/context/AuthContext';
-import axios from 'axios';
+import api from '../../../src/utils/axios';
 import { Lightbulb, Link, AlertTriangle, TrendingUp, BarChart2 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
@@ -21,9 +21,7 @@ export default function Patterns() {
 
   const fetchPatterns = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/patterns', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/patterns');
       setPatterns(res.data);
     } catch (err) {
       console.log(err);
@@ -34,9 +32,7 @@ export default function Patterns() {
 
   const fetchLogs = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/logs', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/logs');
       setLogs(res.data.slice(0, 14).reverse());
     } catch (err) {
       console.log(err);
