@@ -14,7 +14,10 @@ const dismissProofRoutes = require('./routes/dismissproof');
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://hera-health-tawny.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
