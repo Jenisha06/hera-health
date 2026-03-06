@@ -14,10 +14,18 @@ const dismissProofRoutes = require('./routes/dismissproof');
 const app = express();
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://hera-health-tawny.vercel.app'
-  ],
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://hera-health-tawny.vercel.app',
+      'https://hera-health-i9lrokp5u-jenisha-dsouzas-projects.vercel.app'
+    ];
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
