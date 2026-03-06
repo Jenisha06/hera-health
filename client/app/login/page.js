@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { useAuth } from '../../src/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import axios from 'axios';
+const API = 'https://hera-health.onrender.com/api';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -16,7 +18,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form);
+     const res = await axios.post(`${API}/auth/login`, form);
       login(res.data.token, res.data.user);
       router.push('/dashboard');
     } catch (err) {
